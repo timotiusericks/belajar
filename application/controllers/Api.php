@@ -71,34 +71,6 @@ class api extends CI_Controller {
                 }
             }
 
-            else if($_SERVER['REQUEST_METHOD'] == 'DELETE'){
-
-                $foo = file_get_contents("php://input");
-                $bar = json_decode($foo, true);
-
-                if(json_last_error() !== JSON_ERROR_NONE){
-                    //ERROR
-                    $error_text = array(
-                        'type' => 'Bad request',
-                        'message' => 'JSON malformed'
-                    );
-                    $result = array(
-                        'error' => $error_text
-                    );
-
-                    http_response_code(400);
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
-                }
-                else {
-                    
-                    http_response_code(200);
-                    header('Content-Type: application/json');
-
-                    $query = $this->db->delete('news', array('id' => $bar['id']));
-                }
-            }
-
             else if($_SERVER['REQUEST_METHOD'] == 'PUT'){
 
                 $foo = file_get_contents("php://input");
@@ -162,6 +134,39 @@ class api extends CI_Controller {
                         'dota' => $data['news_item']
                     );
 
+                    header('Content-Type: application/json');
+                    echo json_encode($result);
+                }
+            }
+
+            else if($_SERVER['REQUEST_METHOD'] == 'DELETE'){
+                $data['news_item'] = $this->news_model->get_news($id);
+                if(isset($data['news_item']) && $data['news_item'] != NULL){
+                    $this->news_model->delete_news($id);
+
+                    $error_text = array(
+                        'type' => 'Success',
+                        'message' => 'News deleted'
+                    );
+                    $result = array(
+                        'Message' => $error_text
+                    );
+
+                    http_response_code(400);
+                    header('Content-Type: application/json');
+                    echo json_encode($result);
+                }
+                else {
+                    //ERROR
+                    $error_text = array(
+                        'type' => 'Bad request',
+                        'message' => 'No news found'
+                    );
+                    $result = array(
+                        'error' => $error_text
+                    );
+
+                    http_response_code(400);
                     header('Content-Type: application/json');
                     echo json_encode($result);
                 }

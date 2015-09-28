@@ -41,8 +41,6 @@ class News_model extends CI_Model {
 
 		public function delete_news($id = FALSE)
 		{
-
 	        $query = $this->db->delete('news', array('id' => $id));
-	        return $query->row_array();
 		}
 }
