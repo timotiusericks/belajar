@@ -13,15 +13,29 @@ class api extends CI_Controller {
         public function index()
         {
             if($_SERVER['REQUEST_METHOD'] == 'GET'){
-                $data['title'] = 'News archive';
-                $data['news'] = $this->news_model->get_news();
-                
-                $result = array(
-                    'dota' => $data
-                );
+                if(isset($_GET['page'])){
+                    $data['title'] = 'News archive';
+                    $offset = $_GET['offset'];
+                    $cursor = (($_GET['page'] - 1) * $offset) + 1;
+                    $data['news'] = $this->news_model->get_news(FALSE, $cursor, $offset);
+                    
+                    $result = array(
+                        'dota' => $data
+                    );
 
-                header('Content-Type: application/json');
-                echo json_encode($result);
+                    header('Content-Type: application/json');
+                    echo json_encode($result);
+                }
+                else {
+                    $data['news'] = $this->news_model->get_news();
+                    
+                    $result = array(
+                        'dota' => $data
+                    );
+
+                    header('Content-Type: application/json');
+                    echo json_encode($result);
+                }
             }
             else if($_SERVER['REQUEST_METHOD'] == 'POST'){
 
