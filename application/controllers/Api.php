@@ -52,7 +52,7 @@ class api extends CI_Controller {
                 $bar = json_decode($foo, true);
 
                 if(json_last_error() !== JSON_ERROR_NONE){
-                    $this->simple_json_write($bar, 400, 1);
+                    $this->simple_json_write($bar, 400, "error");
                 }
                 else {
                     http_response_code(201);
@@ -73,7 +73,7 @@ class api extends CI_Controller {
                 $bar = json_decode($foo, true);
 
                 if(json_last_error() !== JSON_ERROR_NONE){
-                    $this->simple_json_write($bar, 400, 1);
+                    $this->simple_json_write($bar, 400, "error");
                 }
                 else {
                     http_response_code(200);
@@ -98,7 +98,7 @@ class api extends CI_Controller {
 
                 if (empty($data['news_item']))
                 {   
-                    $this->simple_json_write($bar, 400, 1);
+                    $this->simple_json_write($bar, 400, "error");
                 }
                 else {
                     $result = array(
@@ -125,7 +125,7 @@ class api extends CI_Controller {
                     $this->simple_json_write($result, 400);
                 }
                 else {
-                    $this->simple_json_write($data['news_item'], 400, 1);
+                    $this->simple_json_write($data['news_item'], 400, "error");
                 }
             }
         }

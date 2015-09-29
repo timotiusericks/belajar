@@ -59,10 +59,10 @@ class Comments_api extends CI_Controller {
                 $bar = json_decode($foo, true);
 
                 if(json_last_error() !== JSON_ERROR_NONE){
-                    $this->simple_json_write($bar, 400, 1);
+                    $this->simple_json_write($bar, 400, "error");
                 }
                 else if($bar['text'] == null){
-                    $this->simple_json_write($bar, 400, 1);
+                    $this->simple_json_write($bar, 400, "error");
                 }
                 else {
                     
@@ -85,7 +85,7 @@ class Comments_api extends CI_Controller {
                 $data['news'] = $this->comments_model->get_comments($news_id, FALSE, FALSE, $id);
                 
                 if($data['news'] == null){
-                    $this->simple_json_write($data, 400, 1);
+                    $this->simple_json_write($data, 400, "error");
                 }
                 else {
                     $result = array(
@@ -100,7 +100,7 @@ class Comments_api extends CI_Controller {
                 $data['news'] = $this->comments_model->get_comments($news_id, FALSE, FALSE, $id);
                 
                 if($data['news']== null){
-                    $this->simple_json_write($data, 400, 1);
+                    $this->simple_json_write($data, 400, "error");
                 }
                 else {
                     $this->comments_model->delete_comments($news_id, $id);
