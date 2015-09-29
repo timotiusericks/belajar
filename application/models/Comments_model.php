@@ -16,10 +16,10 @@ class Comments_model extends CI_Model {
 			}
 	        if ($id === FALSE)
 	        {
-	                $this->db->where('news_id', $news_id);
-	                $this->db->from('comments');
-	                $query = $this->db->get();
-	                return $query->result_array();
+                $this->db->where('news_id', $news_id);
+                $this->db->from('comments');
+                $query = $this->db->get();
+                return $query->result_array();
 	        }
 
 	        $this->db->where('news_id', $news_id);
@@ -39,6 +39,15 @@ class Comments_model extends CI_Model {
 		    );
 
 		    return $this->db->insert('comments', $data);
+		}
+
+		public function update_comments($news_id, $id, $data)
+		{
+		    $this->load->helper('url');
+
+		    $this->db->where('id', $id);
+		    $this->db->where('news_id', $news_id);
+            $this->db->update('comments', $data); 
 		}
 
 		public function delete_comments($news_id, $id)

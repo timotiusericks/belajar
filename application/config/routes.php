@@ -41,11 +41,11 @@
 $route['default_controller'] = "welcome";
 $route['404_override'] = '';
 
-$route['api/v1/news'] = 'api';
-$route['api/v1/news/(:num)'] = 'api/view/$1';
+$route['api/v1/news'] = 'NewsController';
+$route['api/v1/news/(:num)'] = 'NewsController/view/$1';
 
-$route['api/v1/news/(:num)/comments'] = 'comments_api/index/$1';
-$route['api/v1/news/(:num)/comments/(:num)'] = 'comments_api/view/$1/$2';
+$route['api/v1/news/(:num)/comments'] = 'CommentsController/index/$1';
+$route['api/v1/news/(:num)/comments/(:num)'] = 'CommentsController/view/$1/$2';
 
 $route['news/create'] = 'news/create';
 $route['news/(:any)'] = 'news/view/$1';
