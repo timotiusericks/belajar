@@ -10,54 +10,51 @@ class api extends CI_Controller {
                 $this->load->helper('url_helper');
         }
 
+        public function simple_json_write($arr, $code, $error = NULL){
+            if($error !== NULL){
+                $error_text = array(
+                    'type' => 'Client error',
+                    'message' => 'JSON malformed'
+                );
+                $result = array(
+                    'error' => $error_text
+                );
+            }
+            else $result = $arr;
+
+            http_response_code($code);
+            header('Content-Type: application/json');
+            echo json_encode($result);
+        }
+
         public function index()
         {
             if($_SERVER['REQUEST_METHOD'] == 'GET'){
                 if(isset($_GET['page'])){
                     $data['title'] = 'News archive';
                     $offset = $_GET['offset'];
-                    $cursor = (($_GET['page'] - 1) * $offset) + 1;
+                    $cursor = (($_GET['page'] - 1) * $offset);
                     $data['news'] = $this->news_model->get_news(FALSE, $cursor, $offset);
-                    
-                    $result = array(
-                        'dota' => $data
-                    );
-
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
                 }
                 else {
                     $data['news'] = $this->news_model->get_news();
-                    
-                    $result = array(
-                        'dota' => $data
-                    );
-
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
                 }
+
+                $result = array(
+                    'dota' => $data
+                );
+                $this->simple_json_write($result, 200);
             }
+
             else if($_SERVER['REQUEST_METHOD'] == 'POST'){
 
                 $foo = file_get_contents("php://input");
                 $bar = json_decode($foo, true);
 
                 if(json_last_error() !== JSON_ERROR_NONE){
-                    //ERROR
-                    $error_text = array(
-                        'type' => 'Bad request',
-                        'message' => 'JSON malformed'
-                    );
-                    $result = array(
-                        'error' => $error_text
-                    );
-
-                    http_response_code(400);
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
+                    $this->simple_json_write($bar, 400, 1);
                 }
                 else {
-                    
                     http_response_code(201);
                     header('Content-Type: application/json');
 
@@ -66,7 +63,6 @@ class api extends CI_Controller {
                         'slug' => $bar['slug'],
                         'text' => $bar['text']
                     );
-
                     return $this->db->insert('news', $data);
                 }
             }
@@ -77,24 +73,11 @@ class api extends CI_Controller {
                 $bar = json_decode($foo, true);
 
                 if(json_last_error() !== JSON_ERROR_NONE){
-                    //ERROR
-                    $error_text = array(
-                        'type' => 'Bad request',
-                        'message' => 'JSON malformed'
-                    );
-                    $result = array(
-                        'error' => $error_text
-                    );
-
-                    http_response_code(400);
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
+                    $this->simple_json_write($bar, 400, 1);
                 }
                 else {
-                    
                     http_response_code(200);
                     header('Content-Type: application/json');
-
 
                     $data = array(
                         'title' => $bar['title'],
@@ -105,7 +88,6 @@ class api extends CI_Controller {
                     $this->db->where('id', $bar['id']);
                     $this->db->update('news', $bar); 
                 }
-                
             }
         }
 
@@ -116,26 +98,14 @@ class api extends CI_Controller {
 
                 if (empty($data['news_item']))
                 {   
-                    //ERROR
-                    $error_text = array(
-                        'type' => 'Client error',
-                        'message' => 'No News found'
-                    );
-                    $result = array(
-                        'error' => $error_text
-                    );
-
-                    http_response_code(404);
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
+                    $this->simple_json_write($bar, 400, 1);
                 }
                 else {
                     $result = array(
                         'dota' => $data['news_item']
                     );
 
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
+                    $this->simple_json_write($result, 400);
                 }
             }
 
@@ -152,56 +122,11 @@ class api extends CI_Controller {
                         'Message' => $error_text
                     );
 
-                    http_response_code(400);
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
+                    $this->simple_json_write($result, 400);
                 }
                 else {
-                    //ERROR
-                    $error_text = array(
-                        'type' => 'Bad request',
-                        'message' => 'No news found'
-                    );
-                    $result = array(
-                        'error' => $error_text
-                    );
-
-                    http_response_code(400);
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
+                    $this->simple_json_write($data['news_item'], 400, 1);
                 }
-            }
-        }
-
-
-
-        public function create()
-        {
-            $this->load->helper('form');
-            $this->load->library('form_validation');
-
-            $data['title'] = 'Create a news item';
-
-            $this->form_validation->set_rules('title', 'Title', 'required');
-            $this->form_validation->set_rules('text', 'text', 'required');
-
-            if ($this->form_validation->run() === FALSE)
-            {
-                $this->load->view('templates/header', $data);
-                $this->load->view('news/create');
-                $this->load->view('templates/footer');
-
-            }
-            else
-            {
-                $this->news_model->set_news();
-
-                $data['news'] = $this->news_model->get_news();
-                $data['title'] = 'News archive';
-                
-                $this->load->view('templates/header', $data);
-                $this->load->view('news/index', $data);
-                $this->load->view('templates/footer');
             }
         }
 }

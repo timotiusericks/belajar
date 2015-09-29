@@ -9,7 +9,6 @@ class Comments_model extends CI_Model {
         public function get_comments($news_id, $cursor = FALSE, $offset = FALSE, $id = FALSE)
 		{
 			$this->db->select('*');
-
 			if($cursor !== FALSE && $offset !== FALSE){
 				$this->db->where('news_id', $news_id);
 				$query = $this->db->get('comments', $offset, $cursor);
@@ -25,6 +24,7 @@ class Comments_model extends CI_Model {
 
 	        $this->db->where('news_id', $news_id);
 	        $this->db->where('id', $id);
+	        $this->db->from('comments');
 	        $query = $this->db->get();
 	        return $query->row_array();
 		}

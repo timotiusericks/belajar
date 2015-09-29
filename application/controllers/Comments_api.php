@@ -10,6 +10,23 @@ class Comments_api extends CI_Controller {
                 $this->load->helper('url_helper');
         }
 
+        public function simple_json_write($arr, $code, $error = NULL){
+            if($error !== NULL){
+                $error_text = array(
+                    'type' => 'Client error',
+                    'message' => 'JSON malformed'
+                );
+                $result = array(
+                    'error' => $error_text
+                );
+            }
+            else $result = $arr;
+
+            http_response_code($code);
+            header('Content-Type: application/json');
+            echo json_encode($result);
+        }
+
 
         public function index($news_id = NULL)
         {
@@ -22,11 +39,9 @@ class Comments_api extends CI_Controller {
                     $result = array(
                         'page' => $_GET['page'],
                         'dota' => $data
-
                     );
 
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
+                    $this->simple_json_write($result, 200);
                 }
                 else {
                     $data['news'] = $this->comments_model->get_comments($news_id);
@@ -34,8 +49,7 @@ class Comments_api extends CI_Controller {
                         'dota' => $data
                     );
 
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
+                    $this->simple_json_write($result, 200);
                 }
             }
 
@@ -45,32 +59,10 @@ class Comments_api extends CI_Controller {
                 $bar = json_decode($foo, true);
 
                 if(json_last_error() !== JSON_ERROR_NONE){
-                    //ERROR
-                    $error_text = array(
-                        'type' => 'Bad request',
-                        'message' => 'JSON malformed'
-                    );
-                    $result = array(
-                        'error' => $error_text
-                    );
-
-                    http_response_code(400);
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
+                    $this->simple_json_write($bar, 400, 1);
                 }
                 else if($bar['text'] == null){
-                    //ERROR
-                    $error_text = array(
-                        'type' => 'No comment written',
-                        'message' => 'empty comment'
-                    );
-                    $result = array(
-                        'error' => $error_text
-                    );
-
-                    http_response_code(400);
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
+                    $this->simple_json_write($bar, 400, 1);
                 }
                 else {
                     
@@ -82,46 +74,7 @@ class Comments_api extends CI_Controller {
                     );
 
                     $this->comments_model->set_comments($news_id, $data);
-                    //return $this->db->insert('news', $data);
                 }
-            }
-
-
-            else if($_SERVER['REQUEST_METHOD'] == 'PUT'){
-
-                $foo = file_get_contents("php://input");
-                $bar = json_decode($foo, true);
-
-                if(json_last_error() !== JSON_ERROR_NONE){
-                    //ERROR
-                    $error_text = array(
-                        'type' => 'Bad request',
-                        'message' => 'JSON malformed'
-                    );
-                    $result = array(
-                        'error' => $error_text
-                    );
-
-                    http_response_code(400);
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
-                }
-                else {
-                    
-                    http_response_code(200);
-                    header('Content-Type: application/json');
-
-
-                    $data = array(
-                        'title' => $bar['title'],
-                        'slug' => $bar['slug'],
-                        'text' => $bar['text']
-                    );
-
-                    $this->db->where('id', $bar['id']);
-                    $this->db->update('news', $bar); 
-                }
-                
             }
         }
 
@@ -129,46 +82,25 @@ class Comments_api extends CI_Controller {
         {
 
             if($_SERVER['REQUEST_METHOD'] == 'GET'){
-                $data['news'] = $this->comments_model->get_comments($news_id, $id);
+                $data['news'] = $this->comments_model->get_comments($news_id, FALSE, FALSE, $id);
                 
-                if($data['news']['id'] == ''){
-                    $error_text = array(
-                        'type' => 'Error',
-                        'message' => 'No comment found'
-                    );
-                    $result = array(
-                        'Message' => $error_text
-                    );
-
-                    http_response_code(400);
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
+                if($data['news'] == null){
+                    $this->simple_json_write($data, 400, 1);
                 }
                 else {
                     $result = array(
                         'dota' => $data
                     );
 
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
+                    $this->simple_json_write($result, 200);
                 }
             }
 
             else if($_SERVER['REQUEST_METHOD'] == 'DELETE'){
-                $data['news'] = $this->comments_model->get_comments($news_id, $cursor, $offset, $id);
+                $data['news'] = $this->comments_model->get_comments($news_id, FALSE, FALSE, $id);
                 
-                if($data['news']['id'] == ''){
-                    $error_text = array(
-                        'type' => 'Error',
-                        'message' => 'No comment found'
-                    );
-                    $result = array(
-                        'Message' => $error_text
-                    );
-
-                    http_response_code(400);
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
+                if($data['news']== null){
+                    $this->simple_json_write($data, 400, 1);
                 }
                 else {
                     $this->comments_model->delete_comments($news_id, $id);
@@ -180,11 +112,8 @@ class Comments_api extends CI_Controller {
                         'Message' => $error_text
                     );
 
-                    http_response_code(200);
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
+                    $this->simple_json_write($result, 200);
                 }
             }
-
         }
 }
